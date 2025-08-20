@@ -5,4 +5,4 @@ metadata:
   namespace: <YOUR_NAMESPACE>
 data:
   sync.py: |
-  {{SYNC_PY}} #The {{SYNC_PY}} placeholder will be replaced by the contents of scripts/sync.py (below) when you commit.
+  {{SYNC_PY}} # The {{SYNC_PY}} placeholder will be replaced by the contents of scripts/sync.py (below) by the scripts/replace_placeholders.py script during the build process.
