@@ -2,3 +2,88 @@ apiVersion: v1
 kind: ServiceAccount
 metadata:
   name: nexus-oauth-proxy
+  namespace: <YOUR_NAMESPACE>
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: nexus-oauth-proxy
+  namespace: <YOUR_NAMESPACE>
+type: Opaque
+data:
+  # base64-encoded 32 random bytes, e.g. head -c32 /dev/urandom | base64
+  COOKIE_SECRET: <BASE64_COOKIE_SECRET>
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nexus-oauth-proxy
+  namespace: <YOUR_NAMESPACE>
+spec:
+  replicas: 1
+  selector:
+    matchLabels: { app: nexus-oauth-proxy }
+  template:
+    metadata:
+      labels: { app: nexus-oauth-proxy }
+    spec:
+      serviceAccountName: nexus-oauth-proxy
+      containers:
+        - name: oauth-proxy
+          image: <OAUTH_PROXY_IMAGE>
+          args:
+            - --provider=openshift
+            - --http-address=0.0.0.0:8080
+            - --https-address=
+            - --redirect-url=https://<PROXY_ROUTE_HOST>/oauth/callback
+            - --upstream=http://nexus3.<YOUR_NAMESPACE>.svc.cluster.local:8081/
+            - --cookie-secret=$(COOKIE_SECRET)
+            - --pass-user-headers=true
+            - --pass-host-header=true
+            - --pass-basic-auth=false
+            - --skip-provider-button=true
+            - --request-logging=true
+            - --set-xauthrequest                   # helpful for debugging
+            - --openshift-service-account=nexus-oauth-proxy
+          env:
+            - name: COOKIE_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: nexus-oauth-proxy
+                  key: COOKIE_SECRET
+          ports:
+            - name: http
+              containerPort: 8080
+          readinessProbe:
+            httpGet: { path: /oauth/healthz, port: 8080 }
+            initialDelaySeconds: 3
+            periodSeconds: 10
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: nexus-oauth-proxy
+  namespace: <YOUR_NAMESPACE>
+spec:
+  selector: { app: nexus-oauth-proxy }
+  ports:
+    - name: http
+      port: 80
+      targetPort: 8080
+---
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: nexus
+  namespace: <YOUR_NAMESPACE>
+  annotations:
+    haproxy.router.openshift.io/set-forwarded-headers: append
+spec:
+  host: <PROXY_ROUTE_HOST>
+  to:
+    kind: Service
+    name: nexus-oauth-proxy
+  port:
+    targetPort: http
+  tls:
+    termination: edge
