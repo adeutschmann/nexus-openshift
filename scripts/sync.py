@@ -36,7 +36,9 @@ GH_HEADERS = {"Authorization": f"Bearer {G_TOKEN}","Accept":"application/vnd.git
               "X-GitHub-Api-Version":"2022-11-28","User-Agent":"nexus-user-sync"}
 
 def http_json(url, method="GET", headers=None, data=None, expected=(200,201,204)):
-    req = urllib.request.Request(url, method=method); [req.add_header(k,v) for k,v in (headers or {}).items()]
+    req = urllib.request.Request(url, method=method)
+    for k, v in (headers or {}).items():
+        req.add_header(k, v)
     body = json.dumps(data).encode() if data is not None else None
     if body: req.add_header("Content-Type","application/json")
     try:
