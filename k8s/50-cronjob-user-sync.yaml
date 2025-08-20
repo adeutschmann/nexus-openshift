@@ -1,0 +1,40 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: nexus-user-sync
+  namespace: <YOUR_NAMESPACE>
+spec:
+  schedule: "*/10 * * * *"
+  successfulJobsHistoryLimit: 1
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          restartPolicy: Never
+          containers:
+            - name: sync
+              image: python:3.11-alpine
+              command: [ "sh","-lc","python /app/sync.py" ]
+              env:
+                - { name: NEXUS_URL, value: "http://nexus3:8081" }
+                - { name: GITHUB_ORG, value: "<GITHUB_ORG>" }
+                - { name: USERNAME_STRATEGY, value: "github_login" }  # or email_localpart
+                - { name: DEFAULT_ROLES, value: "nx-browser" }        # or "authenticated-users"
+                - { name: DISABLE_MISSING, value: "false" }
+                - { name: DEFAULT_PASSWORD, value: "unused-temp" }
+                - name: NEXUS_ADMIN_USER
+                  valueFrom: { secretKeyRef: { name: nexus-admin, key: NEXUS_ADMIN_USER } }
+                - name: NEXUS_ADMIN_PASS
+                  valueFrom: { secretKeyRef: { name: nexus-admin, key: NEXUS_ADMIN_PASS } }
+                - name: GITHUB_TOKEN
+                  valueFrom: { secretKeyRef: { name: gh-org-sync, key: GITHUB_TOKEN } }
+                - { name: EXCLUDE_USERS, value: "admin,ops-admin" }
+              volumeMounts:
+                - name: code
+                  mountPath: /app
+          volumes:
+            - name: code
+              configMap:
+                name: nexus-user-sync
+                defaultMode: 0755
