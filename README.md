@@ -35,6 +35,7 @@ This repository provides a ready‑to‑apply overlay for running **Nexus Reposi
 
 **Kubernetes/OpenShift manifests**
 
+- [`k8s/00-namespace.yaml`](k8s/10-oauth-proxy.yaml) — Namespace
 - [`k8s/10-oauth-proxy.yaml`](k8s/10-oauth-proxy.yaml) — SA, Secret, Deployment, Service, Route for **oauth‑proxy** in front of Nexus UI  
 - [`k8s/20-route-repo-direct.yaml`](k8s/20-route-repo-direct.yaml) — **Direct Route** to Nexus service for CLI (no OAuth)  
 - [`k8s/30-secrets.yaml`](k8s/30-secrets.yaml) — Secrets for Nexus admin API and GitHub PAT  
@@ -53,7 +54,7 @@ This repository provides a ready‑to‑apply overlay for running **Nexus Reposi
 
 - [`docs/maven-examples.md`](docs/maven-examples.md) — Maven deploy/resolve (POM and CLI)  
 - [`docs/roles-cheatsheet.md`](docs/roles-cheatsheet.md) — Minimal privileges for uploads, plus role creation via REST  
-- [`docs/curl-examples.sh`](docs/curl-examples.sh) — Handy API snippets (anonymous on/off, realms order)
+- [`docs/curl-examples.sh`](docs/curl-examples.md) — Handy API snippets (anonymous on/off, realms order)
 
 ---
 
