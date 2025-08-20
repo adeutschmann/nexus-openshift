@@ -29,7 +29,8 @@ EXCLUDE_USERS = {u.strip() for u in os.getenv("EXCLUDE_USERS", "admin").split(",
 DRY_RUN = os.getenv("DRY_RUN", "false").lower() == "true"
 
 if not all([N_PASS, G_ORG, G_TOKEN]):
-    print("ERROR: Missing required env: NEXUS_ADMIN_PASS, GITHUB_ORG, GITHUB_TOKEN", file=sys.stderr); sys.exit(2)
+    print("ERROR: Missing required env: NEXUS_ADMIN_PASS, GITHUB_ORG, GITHUB_TOKEN", file=sys.stderr)
+    sys.exit(2)
 
 BASIC = "Basic " + base64.b64encode(f"{N_ADMIN}:{N_PASS}".encode()).decode()
 GH_HEADERS = {"Authorization": f"Bearer {G_TOKEN}","Accept":"application/vnd.github+json",
