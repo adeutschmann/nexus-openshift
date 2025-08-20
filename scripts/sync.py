@@ -43,7 +43,7 @@ def http_json(url, method="GET", headers=None, data=None, expected=(200,201,204)
         with urllib.request.urlopen(req, body, timeout=90) as r:
             code = r.getcode(); raw = r.read()
             out = json.loads(raw.decode()) if (raw and r.headers.get_content_type()=="application/json") else (raw.decode() if raw else None)
-            if code not in expected: raise Exception(f"Unexpected {code} from {url}: {out}")
+            if code not in expected: raise Exception(f"Unexpected {code} from {url} (expected {expected}): {out}")
             return out
     except urllib.error.HTTPError as e:
         text = e.read().decode()
