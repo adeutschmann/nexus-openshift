@@ -106,7 +106,13 @@ print(f"INFO: Existing Nexus users (after excludes): {len(existing)}")
 
 to_create = [uid for uid in gh_map if uid not in existing]
 to_disable = [uid for uid in existing if uid not in gh_map] if DISABLE_MISSING else []
+def get_users_to_disable(existing_users, gh_users, exclude_users):
+    """
+    Returns a list of user IDs that are in existing_users but not in gh_users, excluding any in exclude_users.
+    """
+    return [uid for uid in existing_users if uid not in gh_users and uid not in exclude_users]
 
+to_disable = get_users_to_disable(existing, gh_map, EXCLUDE_USERS) if DISABLE_MISSING else []
 role_ids = {r["id"] for r in nexus_roles() if isinstance(r, dict)}
 for rid in DEFAULT_ROLES:
     if rid not in {"nx-browser","nx-admin","nx-anonymous"} and rid not in role_ids:
